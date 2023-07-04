@@ -48,7 +48,8 @@ def CreateKakaoJson():
     kakaourl = "https://kauth.kakao.com/oauth/token"
     client_id = '60ebe15145bad656cff8f17a71e888af'
     redirect_uri = 'https://appnoriReview.com/oauth'
-    code = '1JQZuxNu53DWBz4xjA3NNSHc0BWUFoCGhCtAFywlWk-Fq3Izbfww4t-N3fiYeqcoUeHkPAo9dJgAAAGJHrKXfg'
+    code = GetKakaoCode()
+    #code = '1JQZuxNu53DWBz4xjA3NNSHc0BWUFoCGhCtAFywlWk-Fq3Izbfww4t-N3fiYeqcoUeHkPAo9dJgAAAGJHrKXfg'
     
     data = {
         'grant_type':'authorization_code',
@@ -153,6 +154,7 @@ def SendMsgForKakao(title="  ",content =""):
         "text":f"출처: "+title+"\n내용:"+content,
         "link":{
             "web_url" :"https://docs.google.com/spreadsheets/d/1y0ipGFAf4j7ta-jHRzVMi5XYKQbaWjhrGZlhh9v894k/edit#gid=0",
+            "mobile_web_url" :"https://docs.google.com/spreadsheets/d/1y0ipGFAf4j7ta-jHRzVMi5XYKQbaWjhrGZlhh9v894k/edit#gid=0",
         },
         "button_title": "확인"
         })
@@ -163,7 +165,8 @@ def SendMsgForKakao(title="  ",content =""):
     print(response.json())
     if(response.status_code != 200 and content ==""):
         print("카카오톡 api 에러")
-        sys.exit()
+        CreateKakaoJson()
+        #sys.exit()
    
 
 def GetKakaoCode():
@@ -177,11 +180,12 @@ def GetKakaoCode():
     time.sleep(2)
     but = driver.find_element(By.XPATH,value ='//*[@id="mainContent"]/div/div/form/div[4]/button[1]')
     but.click()
+    time.sleep(10)
     url=driver.current_url
     print(driver.current_url)
-    #https://appnorireview.com/oauth?code= 이걸 빼야함
-
-    time.sleep(1000)
+    url = url.replace("https://appnorireview.com/oauth?code=","")
+    print(url)
+    return url
 
 
 def SendAlarm(alarmList,index,data,notCheck,title):
@@ -476,6 +480,10 @@ def WebCrawlingOculus2(url,base,worksheet):
           i += 1
           worksheet.append_row([new,t, c,total,point, cou, h,l])# sheet 내 각 행에 데이터 추가
           time.sleep(1)
+
+
+
+
 
 
 
