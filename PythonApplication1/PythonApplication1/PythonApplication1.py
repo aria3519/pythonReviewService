@@ -138,7 +138,7 @@ def SendMsgForKakao(title="  ",content =""):
     print("=============================================")
     #print(friends_list[0].get("uuid"))
     friend_id = friends_list[1].get("uuid")
-    friend_id2 = friends_list[2].get("uuid")
+    friend_id2 = friends_list[0].get("uuid")
     print(friend_id)
   
     send_url= "https://kapi.kakao.com/v1/api/talk/friends/message/default/send"
@@ -148,7 +148,7 @@ def SendMsgForKakao(title="  ",content =""):
     #uuidsData = {"receiver_uuids" : json.dumps(friend_id)}    
     #-data-urlencode 'receiver_uuids=["abcdefg0001","abcdefg0002","abcdefg0003"]'
     data={
-    'receiver_uuids':'["{}"]'.format(friend_id)+',["{}"]'.format(friend_id2),
+    'receiver_uuids':'["{}","{}"]'.format(friend_id,friend_id2),
     "template_object": json.dumps({
         "object_type":"text",
         "text":f"출처: "+title+"\n내용:"+content,
@@ -484,8 +484,8 @@ def WebCrawlingOculus2(url,base,worksheet):
 
 
 
-
-
+#CreateKakaoJson()
+#"""
 
 # 카카오톡 인증키 확인용 api 호출 
 now = datetime.now()
@@ -620,9 +620,6 @@ worksheet.columns_auto_resize
 worksheet.rows_auto_resize
 print("구글 스프레드 사이즈 조절 완료")
 
+#"""
 
-
-#GetKakaoCode()
-#CreateKakaoJson()
-#SendMsgForKakao()
 
