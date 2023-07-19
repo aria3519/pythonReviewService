@@ -46,9 +46,9 @@ def tel_id_check():
     for i in updates:
         print(u.message['chat']['id'])
 
-def SendTelegramBot(title="  ",content =""):
+def SendTelegramBot(title="  ",content ="",day = "",point="",gameType=""):
 
-    data = {"chat_id" : tel_id, "text": f"출처: "+title+"\n내용:"+content }
+    data = {"chat_id" : tel_id, "text": f"게임: "+gameType+f"\n날짜: "+day + f"\n출처: "+title+"평점:"+point +"\n내용:"+content }
     res = requests.post('https://api.telegram.org/bot6150221677:AAE4Ue-beARKbFtM1472toqPMf-QCtjpr5E/sendMessage',
                         data = data)
     print(res)
@@ -213,18 +213,26 @@ def GetKakaoCode():
 
 
 
-def SendAlarm(alarmList,index,data,notCheck,title,eng=""):
+
+def SendAlarm(alarmList,index,data,notCheck,title,day,point,gametype=0,eng=""):
     if(notCheck == True or index >= len(alarmList)):
         return "Old"
     if(alarmList[index] != data ):
         #SendMsgForKakao(title,data)
         #SendTelegramBot(title,data)
-        """
+        ty =" "
+        if(gametype == 0):
+            ty = "All_In_One"
+        elif(gametype ==1):
+             ty = "All_In_One_Summer"
+        elif(gametype ==2):
+            ty = "RealGostopVR"
         if(eng ==""):
-            SendTelegramBot(title,data)
+            SendTelegramBot(title,data,day,point,ty)
         else:
-            SendTelegramBot(title,eng)
-        """
+            SendTelegramBot(title,eng,day,point,ty)
+        
+        ##print(title+"\w"+day+"\w"+point+"\w"+eng)
         return "New"
     else:
         return "Old"
@@ -274,9 +282,9 @@ def WebCrawlingSteamReview(url,base,worksheet):
           if(i>=4):
               check = True
           if(new == "New"):
-              new = SendAlarm(alarmList,i-1,l,check,base)
+              new = SendAlarm(alarmList,i-1,l,check,base,h,point)
           else:
-              new = SendAlarm(alarmList,i,l,check,base)
+              new = SendAlarm(alarmList,i,l,check,base,h,point)
           if(new !="New"):
               i+=1
           worksheet.append_row([new,t, c,total,point, cou, h,l])# sheet 내 각 행에 데이터 추가
@@ -338,7 +346,6 @@ def WebCrawlingPico(urlLog,url1,url2,base,worksheet):
     i = 4
     new = "Old"
     for con in checklist:
-        
         t = base+"GB" #출처
         c = con.select_one("div.header>div>div>span.name").text.strip()
         pointlist = con.select('img')
@@ -353,9 +360,9 @@ def WebCrawlingPico(urlLog,url1,url2,base,worksheet):
         if(i>=6):
             check = True
         if(new == "New"):
-            new = SendAlarm(alarmList,i-1,l,check,t)
+            new = SendAlarm(alarmList,i,l,check,t,h,str(count))
         else:
-            new = SendAlarm(alarmList,i,l,check,t)
+            new = SendAlarm(alarmList,i,l,check,t,h,str(count))
         if(new !="New"):
             i+=1
         worksheet.append_row([new,t,c,total,str(count), cou, h,l])# sheet 내 각 행에 데이터 추가
@@ -411,9 +418,9 @@ def WebCrawlingPico(urlLog,url1,url2,base,worksheet):
           if(i>=8):
               check = True
           if(new == "New"):
-              new = SendAlarm(alarmList,i-1,l,check, t,eng)
+              new = SendAlarm(alarmList,i-1,l,check, t,h,str(count),eng)
           else:
-              new = SendAlarm(alarmList,i,l,check, t,eng)
+              new = SendAlarm(alarmList,i,l,check, t,h,str(count),eng)
           if(new !="New"):
               i+=1
           index += 1
@@ -460,7 +467,7 @@ def WebCrawlingOculus1(url,base,worksheet):
           check = False
           if(i>=10):
               check = True
-          new = SendAlarm(alarmList,i,l,check,base)
+          new = SendAlarm(alarmList,i,l,check,base,h,point)
           i += 1
           worksheet.append_row([new,t, c,total,point, cou, h,l])# sheet 내 각 행에 데이터 추가
           time.sleep(1)
@@ -512,7 +519,7 @@ def WebCrawlingOculus2(url,base,worksheet):
           check = False
           if(i>=9):
               check = True
-          new = SendAlarm(alarmList,i,l,check,base)
+          new = SendAlarm(alarmList,i,l,check,base,h,point)
           i += 1
           worksheet.append_row([new,t, c,total,point, cou, h,l])# sheet 내 각 행에 데이터 추가
           time.sleep(1)
@@ -562,7 +569,7 @@ def WebCrawlingPicoSummer(urlLog,url1,url2,base):
     new = "Old"
     for con in checklist:
         
-        t = base+"GBSummer" #출처
+        t = base+"GB" #출처
         c = con.select_one("div.header>div>div>span.name").text.strip()
         pointlist = con.select('img')
         count = 0
@@ -577,9 +584,9 @@ def WebCrawlingPicoSummer(urlLog,url1,url2,base):
         if(i>=2):
             check = True
         if(new == "New"):
-            new = SendAlarm(alarmList,i-1,l,check,t)
+            new = SendAlarm(alarmList,i-1,l,check,t,h,str(count),1)
         else:
-            new = SendAlarm(alarmList,i,l,check,t)
+            new = SendAlarm(alarmList,i,l,check,t,h,str(count),1)
         if(new !="New"):
             i+=1
         
@@ -618,7 +625,7 @@ def WebCrawlingPicoSummer(urlLog,url1,url2,base):
     total =  html.select_one('span.number').text.strip()
     for con in checklist:
         
-          t = base+"ChinaSummer" #출처
+          t = base+"China" #출처
           new ="Old"
           #print(con)
           c = con.select_one("div.header>div>div>span.name").text.strip() #글제목
@@ -636,9 +643,9 @@ def WebCrawlingPicoSummer(urlLog,url1,url2,base):
           if(i>=4):
               check = True
           if(new == "New"):
-              new = SendAlarm(alarmList,i-1,l,check, t,eng)
+              new = SendAlarm(alarmList,i-1,l,check, t,h,str(count),1,eng)
           else:
-              new = SendAlarm(alarmList,i,l,check, t,eng)
+              new = SendAlarm(alarmList,i,l,check, t,h,str(count),1,eng)
           if(new !="New"):
               i+=1
           
@@ -654,6 +661,74 @@ def WebCrawlingPicoSummer(urlLog,url1,url2,base):
 
 #CreateKakaoJson()
 
+def WebCrawlingPicoGostop(urlLog,url1,url2,base):
+    chrome_ver = chromedriver_autoinstaller.get_chrome_version()
+    path=chromedriver_autoinstaller.install()
+    driver = webdriver.Chrome()
+    driver.get(urlLog)
+    time.sleep(3)
+    # 로그인하기
+    #select=Select(driver.find_element(By.CSS_SELECTOR,value ="#review_context"))
+
+    inputid = driver.find_element(By.XPATH,value ='//*[@id="root"]/main/div/div/div/article/article/article/form/div[1]/div[2]/input')
+    inputpw = driver.find_element(By.XPATH,value ='//*[@id="root"]/main/div/div/div/article/article/article/form/div[2]/div/input')
+    inputid.send_keys("howard@appnori.com")
+    inputpw.send_keys("Appnori73")
+    time.sleep(2)
+    but = driver.find_element(By.XPATH,value ='//*[@id="root"]/main/div/div/div/article/article/article/form/div[5]/button')
+    but.click()
+    time.sleep(8)
+    butx = driver.find_element(By.XPATH,value ='//*[@id="dev-warp"]/div/div[3]/div[3]/div/div[1]/button')
+    butx.click()
+    time.sleep(2)
+    # pico 리뷰 페이지 
+    #driver.get("https://developer-global.pico-interactive.com/console#/app/reviews/397/7098225807675359237")
+    driver.get(url1)
+    time.sleep(2)
+    butRecent = driver.find_element(By.XPATH,value ='//*[@id="pane-1"]/div/div[2]/div[1]/div[1]/div[1]/div/span/span')
+    butRecent.click()
+    butRecenttime = driver.find_element(By.XPATH,value ='/html/body/div[3]/div[1]/div[1]/ul/li[3]/span')
+    driver.execute_script("arguments[0].click()",butRecenttime)
+    
+    #butRecenttime = driver.find_element(By.XPATH,value ='/html/body/div[3]/div[1]/div[1]/ul')
+    #driver.execute_script("arguments[0].click()",butRecenttime)
+    #/html/body/div[5]/div[1]/div[1]/ul/li[2]
+    time.sleep(5)
+    raw = driver.page_source
+    html = BeautifulSoup(raw, 'html.parser')
+    time.sleep(5)
+    container = html.select('div.review_card')
+    checklist = list()
+    total =  html.select_one('span.number').text.strip()
+    for i in range(0,20):
+         checklist.append(container[i])
+    i = 0
+    new = "Old"
+    for con in checklist:
+        
+        t = base+"GB" #출처
+        c = con.select_one("div.header>div>div>span.name").text.strip()
+        pointlist = con.select('img')
+        count = 0
+        for point in pointlist:
+            if(point.get('src') =="https://sf16-scmcdn-va.ibytedtos.com/obj/static-us/pico/developer_frontend/img/rating_star_yellow.0a718ebc.svg"):
+                count += 1
+        cou = "X"#글코멘트수
+        h = con.select_one("div.header>div>div>span.time").text.strip() #글날짜
+        l = con.select_one("div.content>div.review").text.strip() #글내용
+        
+        check = False
+        if(i>=2):
+            check = True
+        if(new == "New"):
+            new = SendAlarm(alarmList,i,l,check,t,h,str(count),2)
+        else:
+            new = SendAlarm(alarmList,i,l,check,t,h,str(count),2)
+        if(new !="New"):
+            i+=1
+        
+        worksheet.append_row([new,t,c,total,str(count), cou, h,l])# sheet 내 각 행에 데이터 추가
+        time.sleep(1)
 
 
 # 카카오톡 인증키 확인용 api 호출 
@@ -681,6 +756,18 @@ spreadsheet_url = 'https://docs.google.com/spreadsheets/d/1y0ipGFAf4j7ta-jHRzVMi
 # 스프레스시트 문서 가져오기
 doc = gc.open_by_url(spreadsheet_url)
 #print(doc)
+
+
+worksheet.clear()
+print("구글 스프레드 clear 되었습니다.")
+# 4. 데이터프레임 내 header(변수명)생성
+worksheet.append_row(["New","출처", "글제목","총평점","개인평점","글코멘트수", "글날짜","글내용","주석"])
+
+WebCrawlingPicoGostop("https://sso-global.picoxr.com/passport?service=https%3a%2f%2fdeveloper-global.pico-interactive.com%2fconsole","https://developer-global.pico-interactive.com/console#/app/reviews/397/7205734342381961221"," ","Pico")
+worksheet.columns_auto_resize
+worksheet.rows_auto_resize
+print("GostopVR 구글 스프레드 사이즈 조절 완료")
+
 
 #시트 선택하기
 worksheet = doc.worksheet('AIOReview')
@@ -763,9 +850,9 @@ for con in container:
     if(i>=2):
         check = True
     if(new == "New"):
-        new = SendAlarm(alarmList,i-1,l,check,t)
+        new = SendAlarm(alarmList,i-1,l,check,t,h,point)
     else:
-        new = SendAlarm(alarmList,i,l,check,t)
+        new = SendAlarm(alarmList,i,l,check,t,h,point)
     i+=1
     worksheet.append_row([new,t, c,total,point, cou, h,l])# sheet 내 각 행에 데이터 추가
 print("steamcommunity가 구글 스프레드에 최신화 되었습니다.")
@@ -815,4 +902,31 @@ worksheet.append_row(["New","출처", "글제목","총평점","개인평점","�
 WebCrawlingPicoSummer("https://sso-global.picoxr.com/passport?service=https%3a%2f%2fdeveloper-global.pico-interactive.com%2fconsole","https://developer-global.pico-interactive.com/console#/app/reviews/397/7114478046865948678"," ","Pico")
 worksheet.columns_auto_resize
 worksheet.rows_auto_resize
-print("Summer구글 스프레드 사이즈 조절 완료")
+print("Summer 구글 스프레드 사이즈 조절 완료")
+
+
+worksheet = doc.worksheet('RealGostop')
+worksheetBefore = doc.worksheet('RealGostopBefore')
+
+
+array = np.array(worksheet.get_all_values())
+alarmList = list()
+alarmList.append(array[1].tolist()[7])
+alarmList.append(array[2].tolist()[7])
+
+worksheetBefore.clear()
+for row in array:
+    worksheetBefore.append_row(row.tolist())
+    time.sleep(1)
+print("이전 시트 저장 완료")
+
+worksheet.clear()
+print("구글 스프레드 clear 되었습니다.")
+# 4. 데이터프레임 내 header(변수명)생성
+worksheet.append_row(["New","출처", "글제목","총평점","개인평점","글코멘트수", "글날짜","글내용","주석"])
+
+WebCrawlingPicoGostop("https://sso-global.picoxr.com/passport?service=https%3a%2f%2fdeveloper-global.pico-interactive.com%2fconsole","https://developer-global.pico-interactive.com/console#/app/reviews/397/7205734342381961221"," ","Pico")
+worksheet.columns_auto_resize
+worksheet.rows_auto_resize
+print("GostopVR 구글 스프레드 사이즈 조절 완료")
+
