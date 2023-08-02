@@ -21,6 +21,9 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="ReviewScript_.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="WebServer.py">
       <SubType>Code</SubType>
     </Compile>

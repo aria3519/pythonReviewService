@@ -1,6 +1,8 @@
 # 엑셀 데이터 구글스프레드 시트 저장
+
 import requests
 from bs4 import BeautifulSoup
+# pip install BeautifulSoup4
 import openpyxl
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
@@ -9,7 +11,7 @@ from openpyxl.styles import Alignment
 import gspread
 
 from oauth2client.service_account import ServiceAccountCredentials
-
+#pip install --upgrade google-api-python-client oauth2client
 
 import selenium
 import chromedriver_autoinstaller
@@ -21,6 +23,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
 import time
 
 import numpy as np
@@ -53,6 +57,34 @@ def SendTelegramBot(title="  ",content ="",day = "",point="",gameType=""):
                         data = data)
     print(res)
    
+def SendAlarm(alarmList,index,data,notCheck,title,day,point,gametype=0,eng=""):
+    if(notCheck == True or index >= len(alarmList)):
+        return "Old"
+    if(alarmList[index] != data ):
+        #SendMsgForKakao(title,data)
+        #SendTelegramBot(title,data)
+        
+        ty =" "
+        if(gametype == 0):
+            ty = "All_In_One"
+        elif(gametype ==1):
+             ty = "All_In_One_Summer"
+        elif(gametype ==2):
+            ty = "RealGostopVR"
+        if(eng ==""):
+            SendTelegramBot(title,data,day,point,ty)
+        else:
+            SendTelegramBot(title,eng,day,point,ty)
+        
+        
+        ##print(title+"\w"+day+"\w"+point+"\w"+eng)
+        return "New"
+    else:
+        return "Old"
+
+
+
+
 
 
 
@@ -211,34 +243,6 @@ def GetKakaoCode():
 
 
 
-
-
-
-def SendAlarm(alarmList,index,data,notCheck,title,day,point,gametype=0,eng=""):
-    if(notCheck == True or index >= len(alarmList)):
-        return "Old"
-    if(alarmList[index] != data ):
-        #SendMsgForKakao(title,data)
-        #SendTelegramBot(title,data)
-        ty =" "
-        if(gametype == 0):
-            ty = "All_In_One"
-        elif(gametype ==1):
-             ty = "All_In_One_Summer"
-        elif(gametype ==2):
-            ty = "RealGostopVR"
-        if(eng ==""):
-            SendTelegramBot(title,data,day,point,ty)
-        else:
-            SendTelegramBot(title,eng,day,point,ty)
-        
-        ##print(title+"\w"+day+"\w"+point+"\w"+eng)
-        return "New"
-    else:
-        return "Old"
-
-
-
 # 한번에 주석 처리 컨트롤 kc // 해제 컨트롤 ku
 def WebCrawlingSteamReview(url,base,worksheet):
       #raw = requests.get(url)
@@ -282,7 +286,7 @@ def WebCrawlingSteamReview(url,base,worksheet):
           if(i>=4):
               check = True
           if(new == "New"):
-              new = SendAlarm(alarmList,i-1,l,check,base,h,point)
+              new = SendAlarm(alarmList,i,l,check,base,h,point)
           else:
               new = SendAlarm(alarmList,i,l,check,base,h,point)
           if(new !="New"):
@@ -316,6 +320,7 @@ def WebCrawlingPico(urlLog,url1,url2,base,worksheet):
     inputid.send_keys("howard@appnori.com")
     inputpw.send_keys("Appnori73")
     time.sleep(2)
+    wait.until()
     but = driver.find_element(By.XPATH,value ='//*[@id="root"]/main/div/div/div/article/article/article/form/div[5]/button')
     but.click()
     time.sleep(8)
@@ -371,7 +376,7 @@ def WebCrawlingPico(urlLog,url1,url2,base,worksheet):
              
     # 중국 리뷰 
     driver.get(url2)
-    time.sleep(5)
+    time.sleep(10)
     but = driver.find_element(By.XPATH,value ='//*[@id="tab-0"]')
     but.click()
     time.sleep(5)
@@ -384,9 +389,9 @@ def WebCrawlingPico(urlLog,url1,url2,base,worksheet):
     raw = driver.page_source
     html = BeautifulSoup(raw, 'html.parser')
     containerChina = html.select('div.review_card')
-    time.sleep(2)
     butShow = driver.find_element(By.XPATH,value ='//*[@id="pane-0"]/div/div[2]/div[1]/div[2]/div/div/span/span')
     butShow.click()
+    time.sleep(5)
     butEng = driver.find_element(By.XPATH,value ='/html/body/div[4]/div[1]/div[1]/ul/li[2]/span')
     driver.execute_script("arguments[0].click()",butEng)
     time.sleep(5)
@@ -418,9 +423,9 @@ def WebCrawlingPico(urlLog,url1,url2,base,worksheet):
           if(i>=8):
               check = True
           if(new == "New"):
-              new = SendAlarm(alarmList,i-1,l,check, t,h,str(count),eng)
+              new = SendAlarm(alarmList,i-1,l,check, t,h,str(count),0,eng)
           else:
-              new = SendAlarm(alarmList,i,l,check, t,h,str(count),eng)
+              new = SendAlarm(alarmList,i,l,check, t,h,str(count),0,eng)
           if(new !="New"):
               i+=1
           index += 1
@@ -584,7 +589,7 @@ def WebCrawlingPicoSummer(urlLog,url1,url2,base):
         if(i>=2):
             check = True
         if(new == "New"):
-            new = SendAlarm(alarmList,i-1,l,check,t,h,str(count),1)
+            new = SendAlarm(alarmList,i,l,check,t,h,str(count),1)
         else:
             new = SendAlarm(alarmList,i,l,check,t,h,str(count),1)
         if(new !="New"):
@@ -598,7 +603,7 @@ def WebCrawlingPicoSummer(urlLog,url1,url2,base):
     time.sleep(5)
     but = driver.find_element(By.XPATH,value ='//*[@id="tab-0"]')
     but.click()
-    time.sleep(5)
+    time.sleep(8)
     butRecent = driver.find_element(By.XPATH,value ='//*[@id="pane-0"]/div/div[2]/div[1]/div[1]/div[1]/div/span/span/i')
     butRecent.click()
     time.sleep(1)
@@ -659,7 +664,9 @@ def WebCrawlingPicoSummer(urlLog,url1,url2,base):
     driver.close()
 
 
-#CreateKakaoJson()
+def FindButten(driver,type, value):
+    but = WebDriverWait(driver,10).until(EC.element_to_be_clickable((type,value)))
+    but.click()
 
 def WebCrawlingPicoGostop(urlLog,url1,url2,base):
     chrome_ver = chromedriver_autoinstaller.get_chrome_version()
@@ -675,9 +682,30 @@ def WebCrawlingPicoGostop(urlLog,url1,url2,base):
     inputid.send_keys("howard@appnori.com")
     inputpw.send_keys("Appnori73")
     time.sleep(2)
-    but = driver.find_element(By.XPATH,value ='//*[@id="root"]/main/div/div/div/article/article/article/form/div[5]/button')
-    but.click()
+    #FindButten(By.XPATH,'//*[@id="root"]/main/div/div/div/article/article/article/form/div[5]/button')
+    #but = driver.find_element(By.XPATH,value ='//*[@id="root"]/main/div/div/div/article/article/article/form/div[5]/button')
+    #but.click()
+    FindButten(driver,By.XPATH,'//*[@id="root"]/main/div/div/div/article/article/article/form/div[5]/button')
+    #but = WebDriverWait(driver,10).until(EC.element_to_be_clickable((By.XPATH,'//*[@id="root"]/main/div/div/div/article/article/article/form/div[5]/button')))
+    #but.click()
     time.sleep(8)
+    #//*[@id="dev-warp"]/div/div[2]/div[1]/div/div[2]/div/form/div/div/div/label[2]/span[1]/span
+    #//*[@id="dev-warp"]/div/div[2]/div[1]/div/div[2]/div/p[3]/label/span[1]/span
+    #//*[@id="dev-warp"]/div/div[2]/div[1]/div/div[3]/div/button[1]
+   
+    #but1 = driver.find_element(By.XPATH,value ='//*[@id="dev-warp"]/div/div[2]/div[1]/div/div[2]/div/form/div/div/div/label[2]/span[1]/span')
+    #but1.click()
+    #but2 = driver.find_element(By.XPATH,value ='//*[@id="dev-warp"]/div/div[2]/div[1]/div/div[2]/div/p[3]/label/span[1]/span')
+    #but2.click()
+    #but3 = driver.find_element(By.XPATH,value ='//*[@id="dev-warp"]/div/div[2]/div[1]/div/div[3]/div/button[1]')
+    #but3.click()
+    #inputid = driver.find_element(By.XPATH,value ='//*[@id="root"]/main/div/div/div/article/article/article/form/div[1]/div[2]/input')
+    #inputpw = driver.find_element(By.XPATH,value ='//*[@id="root"]/main/div/div/div/article/article/article/form/div[2]/div/input')
+    #inputid.send_keys("howard@appnori.com")
+    #inputpw.send_keys("Appnori73")
+   
+
+    #FindButten(By.XPATH,'//*[@id="dev-warp"]/div/div[3]/div[3]/div/div[1]/button')
     butx = driver.find_element(By.XPATH,value ='//*[@id="dev-warp"]/div/div[3]/div[3]/div/div[1]/button')
     butx.click()
     time.sleep(2)
@@ -687,6 +715,9 @@ def WebCrawlingPicoGostop(urlLog,url1,url2,base):
     time.sleep(2)
     butRecent = driver.find_element(By.XPATH,value ='//*[@id="pane-1"]/div/div[2]/div[1]/div[1]/div[1]/div/span/span')
     butRecent.click()
+    butRecent = driver.find_element(By.XPATH,value ='//*[@id="pane-1"]/div/div[2]/div[1]/div[1]/div[1]/div/span/span')
+    butRecent.click()
+    FindButten(By.XPATH,'//*[@id="dev-warp"]/div/div[3]/div[3]/div/div[1]/button')
     butRecenttime = driver.find_element(By.XPATH,value ='/html/body/div[3]/div[1]/div[1]/ul/li[3]/span')
     driver.execute_script("arguments[0].click()",butRecenttime)
     
@@ -756,18 +787,7 @@ spreadsheet_url = 'https://docs.google.com/spreadsheets/d/1y0ipGFAf4j7ta-jHRzVMi
 # 스프레스시트 문서 가져오기
 doc = gc.open_by_url(spreadsheet_url)
 #print(doc)
-
-
-worksheet.clear()
-print("구글 스프레드 clear 되었습니다.")
-# 4. 데이터프레임 내 header(변수명)생성
-worksheet.append_row(["New","출처", "글제목","총평점","개인평점","글코멘트수", "글날짜","글내용","주석"])
-
-WebCrawlingPicoGostop("https://sso-global.picoxr.com/passport?service=https%3a%2f%2fdeveloper-global.pico-interactive.com%2fconsole","https://developer-global.pico-interactive.com/console#/app/reviews/397/7205734342381961221"," ","Pico")
-worksheet.columns_auto_resize
-worksheet.rows_auto_resize
-print("GostopVR 구글 스프레드 사이즈 조절 완료")
-
+"""
 
 #시트 선택하기
 worksheet = doc.worksheet('AIOReview')
@@ -850,7 +870,7 @@ for con in container:
     if(i>=2):
         check = True
     if(new == "New"):
-        new = SendAlarm(alarmList,i-1,l,check,t,h,point)
+        new = SendAlarm(alarmList,i,l,check,t,h,point)
     else:
         new = SendAlarm(alarmList,i,l,check,t,h,point)
     i+=1
@@ -876,7 +896,6 @@ print("Oucule"+"가 구글 스프레드에 최신화 되었습니다.")
 worksheet.columns_auto_resize
 worksheet.rows_auto_resize
 print("All-In_One구글 스프레드 사이즈 조절 완료")
-
 
 worksheet = doc.worksheet('SummerReview')
 #worksheet = doc.worksheet('AIOReviewTest')
@@ -905,20 +924,26 @@ worksheet.rows_auto_resize
 print("Summer 구글 스프레드 사이즈 조절 완료")
 
 
+"""
 worksheet = doc.worksheet('RealGostop')
 worksheetBefore = doc.worksheet('RealGostopBefore')
 
 
 array = np.array(worksheet.get_all_values())
 alarmList = list()
-alarmList.append(array[1].tolist()[7])
-alarmList.append(array[2].tolist()[7])
+def checkNull(a):
+    if array[a].tolist()[7]:
+        alarmList.append(array[a].tolist()[7])
+checkNull(1)
+checkNull(2)
+#alarmList.append(array[1].tolist()[7])
+#alarmList.append(array[2].tolist()[7])
 
-worksheetBefore.clear()
-for row in array:
-    worksheetBefore.append_row(row.tolist())
-    time.sleep(1)
-print("이전 시트 저장 완료")
+#worksheetBefore.clear()
+#for row in array:
+#    worksheetBefore.append_row(row.tolist())
+#    time.sleep(1)
+#print("이전 시트 저장 완료")
 
 worksheet.clear()
 print("구글 스프레드 clear 되었습니다.")
@@ -930,3 +955,22 @@ worksheet.columns_auto_resize
 worksheet.rows_auto_resize
 print("GostopVR 구글 스프레드 사이즈 조절 완료")
 
+
+"""
+# 구글 스프레드 시트 값 확인
+val = worksheet.cell(a, b).value
+
+from selenium import webdriver
+from selenium.common.exceptions import TimeoutException    
+driver=webdriver.Firefox() 
+driver.set_page_load_timeout(10)
+while True:
+    try:
+        driver.get(url)
+    except TimeoutException:
+        print("Timeout, retrying...")
+        continue
+    else:
+        break
+"""     
+       
